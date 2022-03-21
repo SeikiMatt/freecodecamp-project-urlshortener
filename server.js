@@ -29,7 +29,7 @@ app.post("/api/shorturl", (req, res) => {
   const url = req.body.url;
 
   if (!validUrl.isUri(url)) {
-    res.json({ error: "Invalid URL" });
+    res.json({ error: "invalid url" });
   } else if (urlMap.indexOf(url) > -1) {
     res.json({
       original_url: url,
