@@ -3,10 +3,21 @@ const express = require("express");
 const helmet = require("helmet");
 const cors = require("cors");
 const app = express();
-const validUrl = require("valid-url");
 
 const port = process.env.PORT || 3000;
 let urlMap = ["https://freecodecamp.org/"];
+
+function isValidUrl(suspect) {
+  let url;
+
+  try {
+    url = new URL(suspect);
+  } catch (_) {
+    return false;
+  }
+
+  return url.protocol === "http:" || url.protocol === "https:";
+}
 
 app.use(helmet());
 app.use(cors());
@@ -26,9 +37,9 @@ app.get("/api/shorturl/:id", (req, res) => {
 });
 
 app.post("/api/shorturl", (req, res) => {
-  const url = req.body.url;
+  const url = req.body.url ?? "";
 
-  if (!validUrl.isUri(url)) {
+  if (!isValidUrl(url)) {
     res.json({ error: "invalid url" });
   } else if (urlMap.indexOf(url) > -1) {
     res.json({
