@@ -37,7 +37,7 @@ app.get("/api/shorturl/:id", (req, res) => {
 });
 
 app.post("/api/shorturl", (req, res) => {
-  const url = req.body.url ?? "";
+  const url = req.body.url;
 
   if (!isValidUrl(url)) {
     res.json({ error: "invalid url" });
