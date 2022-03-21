@@ -1,24 +1,49 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
+require("dotenv").config();
+const express = require("express");
+const helmet = require("helmet");
+const cors = require("cors");
 const app = express();
+const validUrl = require("valid-url");
 
-// Basic Configuration
 const port = process.env.PORT || 3000;
+let urlMap = ["https://freecodecamp.org/"];
 
+app.use(helmet());
 app.use(cors());
+app.use(express.urlencoded({ extended: false }));
+app.use("/public", express.static(`${process.cwd()}/public`));
 
-app.use('/public', express.static(`${process.cwd()}/public`));
-
-app.get('/', function(req, res) {
-  res.sendFile(process.cwd() + '/views/index.html');
+app.get("/", (_, res) => {
+  res.sendFile(process.cwd() + "/views/index.html");
 });
 
-// Your first API endpoint
-app.get('/api/hello', function(req, res) {
-  res.json({ greeting: 'hello API' });
+app.get("/api/shorturl/:id", (req, res) => {
+  if (!urlMap[parseInt(req.params.id)]) {
+    res.json({ error: "Invalid ID" });
+  } else {
+    res.redirect(urlMap[parseInt(req.params.id)]);
+  }
 });
 
-app.listen(port, function() {
+app.post("/api/shorturl", (req, res) => {
+  const url = req.body.url;
+
+  if (!validUrl.isUri(url)) {
+    res.json({ error: "Invalid URL" });
+  } else if (urlMap.indexOf(url) > -1) {
+    res.json({
+      original_url: url,
+      short_url: urlMap.indexOf(url),
+    });
+  } else {
+    urlMap = [...urlMap, url];
+    res.json({
+      original_url: url,
+      short_url: urlMap.length - 1,
+    });
+  }
+});
+
+app.listen(port, () => {
   console.log(`Listening on port ${port}`);
 });
